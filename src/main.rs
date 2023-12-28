@@ -7,6 +7,15 @@ mod scanner;
 
 use scanner::Scanner;
 
+fn report(line: i32, location: &String, message: &String) {
+    println!("[line {}]Error {}: {}", line, location, message);
+    //TODO(FG): set error flag
+}
+
+fn error(line: i32, message: &String) {
+    report(line, &String::new(), message);
+}
+
 fn run(src: &String) {
     println!("{}", src);
 
