@@ -3,8 +3,16 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
+mod scanner;
+
+use scanner::Scanner;
+
 fn run(src: &String) {
     println!("{}", src);
+
+    let scanner = Scanner::new(src);
+
+    let _tokens = scanner.scan_tokens();
 }
 
 fn run_prompt() -> io::Result<()> {
