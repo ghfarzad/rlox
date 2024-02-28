@@ -5,6 +5,8 @@ use std::io::prelude::*;
 
 mod scanner;
 
+use scanner::token::Token;
+use scanner::ScanError;
 use scanner::Scanner;
 
 pub struct Lox {
@@ -33,7 +35,7 @@ impl Lox {
         }
     }
 
-    pub fn run_file(&self, file_path: &String) -> io::Result<()> {
+    pub fn run_file(&self, file_path: &str) -> io::Result<()> {
         let mut f = File::open(file_path)?;
         let mut buffer = String::new();
 
@@ -43,20 +45,25 @@ impl Lox {
         Ok(())
     }
 
-    fn report(&self, line: i32, location: &String, message: &String) {
+    fn report(&self, line: i32, location: &str, message: &str) {
         println!("[line {}]Error {}: {}", line, location, message);
         //TODO(FG): set error flag
     }
 
-    fn error(&self, line: i32, message: &String) {
+    fn error(&self, line: i32, message: &str) {
         self.report(line, &String::new(), message);
     }
 
-    fn run(&self, src: &String) {
-        println!("{}", src);
+    fn run(&self, src: &str) {
+        //println!("{}", src);
 
-        let scanner = Scanner::new(src);
+        let mut scanner = Scanner::new(src);
 
-        let _tokens = scanner.scan_tokens();
+        let result: Result<Vec::<Token>, ScanError> = scanner.scan_tokens();
+
+        match result {
+            Ok(_n) => println!("Ok"),
+            Err(e) => self.error(e.get_line(), &e.get_message())
+        }
     }
 }
