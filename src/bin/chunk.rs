@@ -3,6 +3,7 @@ use std::error::Error;
 
 #[repr(u8)]
 enum OpCode {
+    OpConstant,
     OpReturn,
 }
 
@@ -17,6 +18,7 @@ impl TryFrom<u8> for OpCode {
 
     fn try_from(i: u8) -> Result<Self, Self::Error> {
         match i {
+            x if x == OpCode::OpConstant as u8 => Ok(OpCode::OpConstant),
             x if x == OpCode::OpReturn as u8 => Ok(OpCode::OpReturn),
             _ => Err(()),
         }
