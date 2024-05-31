@@ -23,19 +23,50 @@ impl TryFrom<u8> for OpCode {
     }
 }
 
+struct ValueArray {
+    code: Vec<f64>,
+}
+
+impl ValueArray {
+    pub fn new() -> ValueArray {
+        return ValueArray {
+            code: Vec::new()
+        }
+    }
+
+    pub fn read(&self, index: usize) -> f64 {
+        self.code[index]
+    }
+
+    pub fn write(&mut self, value: f64) -> () {
+        self.code.push(value);
+    }
+
+    pub fn count(&self) -> usize {
+        self.code.len()
+    }
+}
+
 struct Chunk {
     code: Vec<u8>,
+    constants: ValueArray
 }
 
 impl Chunk {
     pub fn new() -> Chunk {
         return Chunk {
-            code: Vec::new()
+            code: Vec::new(),
+            constants: ValueArray::new()
         }
     } 
 
     pub fn write(&mut self, byte: u8) -> () {
         self.code.push(byte);
+    }
+
+    pub fn add_constant(&mut self, value: f64) -> usize {
+        self.constants.write(value);
+        self.constants.count() - 1
     }
 }
 
