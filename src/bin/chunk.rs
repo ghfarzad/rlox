@@ -75,22 +75,39 @@ impl Chunk {
 fn disassemble_chunk(chunk: &Chunk, name: &str) -> () {
     println!("== {} ==", name);
 
-    for (pos, e) in chunk.code.iter().enumerate() {
-        disassemble_instruction(e, pos);
+    let mut i = 0;
+    while i < chunk.code.len() {
+        i = i + disassemble_instruction(chunk, i);
     }
 }
 
-fn disassemble_instruction(instruction: &u8, offset: usize) -> () {
+fn disassemble_constant(name: &str, chunk: &Chunk, offset: usize) -> usize {
+    let i = chunk.code[offset + 1];
+
+    print!("{name} {offset:0>4} ", name = name, offset = offset);
+    println!("{value}", value = chunk.constants.read(i.into()));
+
+    return 2;
+}
+
+fn disassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     print!("{offset:0>4} ", offset = offset);
 
-    let i = *instruction;
-    match i.try_into() {
-        Ok(OpCode::OpReturn) => { println!("OpReturn"); },
-        Err(_) => { println!("Unknown OpCode {}", instruction) }
+    let instruction = chunk.code[offset];
+    match instruction.try_into() {
+        Ok(OpCode::OpConstant) => {
+           return disassemble_constant("OpConstant", chunk, offset);
+        },
+        Ok(OpCode::OpReturn) => {
+            println!("OpReturn");
+            return 1;
+        },
+        Err(_) => {
+            println!("Unknown OpCode {}", instruction);
+            return 1;
+        }
     }
 }
-
-
 
 fn main() -> Result<(), Box<dyn Error>>{
     let args: Vec<String> = env::args().collect();
@@ -98,7 +115,13 @@ fn main() -> Result<(), Box<dyn Error>>{
     match args.len() {
         1 => {
             let mut chunk = Chunk::new();
+
+            let i = chunk.add_constant(1.2);
+            chunk.write(OpCode::OpConstant.into());
+            chunk.write(i.try_into().unwrap());
+
             chunk.write(OpCode::OpReturn.into());
+
             disassemble_chunk(&chunk, "test_chunk");
         },
         _ => {
