@@ -51,6 +51,7 @@ impl ValueArray {
 
 struct Chunk {
     code: Vec<u8>,
+    lines: Vec<u8>,
     constants: ValueArray
 }
 
@@ -58,12 +59,14 @@ impl Chunk {
     pub fn new() -> Chunk {
         return Chunk {
             code: Vec::new(),
+            lines: Vec::new(),
             constants: ValueArray::new()
         }
     } 
 
-    pub fn write(&mut self, byte: u8) -> () {
+    pub fn write(&mut self, byte: u8, line: u8) -> () {
         self.code.push(byte);
+        self.lines.push(line);
     }
 
     pub fn add_constant(&mut self, value: f64) -> usize {
@@ -93,6 +96,12 @@ fn disassemble_constant(name: &str, chunk: &Chunk, offset: usize) -> usize {
 fn disassemble_instruction(chunk: &Chunk, offset: usize) -> usize {
     print!("{offset:0>4} ", offset = offset);
 
+    if offset > 0 && chunk.lines[offset] == chunk.lines[offset - 1] {
+        print!("   | ")
+    } else {
+        print!("{line:0>4} ", line = chunk.lines[offset]);
+    }
+
     let instruction = chunk.code[offset];
     match instruction.try_into() {
         Ok(OpCode::OpConstant) => {
@@ -117,10 +126,12 @@ fn main() -> Result<(), Box<dyn Error>>{
             let mut chunk = Chunk::new();
 
             let i = chunk.add_constant(1.2);
-            chunk.write(OpCode::OpConstant.into());
-            chunk.write(i.try_into().unwrap());
 
-            chunk.write(OpCode::OpReturn.into());
+            let imaginary_line_number = 123;
+            chunk.write(OpCode::OpConstant.into(), imaginary_line_number);
+            chunk.write(i.try_into().unwrap(), imaginary_line_number);
+
+            chunk.write(OpCode::OpReturn.into(),imaginary_line_number);
 
             disassemble_chunk(&chunk, "test_chunk");
         },
