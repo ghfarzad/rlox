@@ -20,7 +20,7 @@ pub struct Scanner {
 
 impl ScanError {
     pub fn new(line: i32, msg: &str) -> ScanError {
-        return ScanError{
+        return ScanError {
             line: line,
             message: String::from(msg)
         }
